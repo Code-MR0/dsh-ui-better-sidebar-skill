@@ -1,0 +1,7 @@
+# bundle patch for the skill-studio plugin: inserts its plugin row into the
+# web profile roster. Applied as a profile bundle layer (the `dsh.bundle.patch`
+# manifest field); install with
+# `dsh plugin --profile web add link:<path-to-this-package>`.
+- insert:
+    - id: ui-better-sidebar-skill
+      name: '@mhw12138/dsh-ui-better-sidebar-skill'
