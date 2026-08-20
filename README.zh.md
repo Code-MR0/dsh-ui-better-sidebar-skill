@@ -82,3 +82,12 @@ dsh plugin --profile web add link:$(pwd)
 - 项目组跟随侧边栏显示的 workspace（`scope.cwd`）；创建表单发送该 workspace，
   项目根为其最近 `.git` 祖先。
 - 界面文案暂为中文，后续可叠加 i18n 命名空间。
+
+## 致谢
+
+本插件基于外部插件
+[dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)
+（MIT 协议，作者 omdsh-dev）的右侧面板框架开发：「技能管理」Tab 通过其
+`ctx.betterSidebar` 服务注册，文件树沿用其 Files 资源管理器的视觉风格。
+本插件运行时依赖 dsh-better-sidebar（请先安装，见[安装](#安装)），并以
+[MIT 协议](LICENSE) 发布。

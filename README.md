@@ -93,3 +93,13 @@ Restart `dsh web`; open the right panel's + menu and pick「技能管理」.
   the create form sends that workspace and the project root is its nearest
   `.git` ancestor.
 - UI copy is Chinese for now; an i18n namespace can be layered on later.
+
+## Acknowledgments
+
+This plugin is built on top of the excellent external
+[dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) (MIT,
+by omdsh-dev) right-panel framework: the「技能管理」tab is registered through
+its `ctx.betterSidebar` service, and the file tree follows the visual style of
+its Files explorer. This package depends on dsh-better-sidebar at runtime
+(install it first — see [Install](#install)) and is released under the
+[MIT License](LICENSE).
