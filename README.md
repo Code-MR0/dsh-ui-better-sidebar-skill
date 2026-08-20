@@ -8,7 +8,7 @@
 </div>
 
 <div align="center">
-  🌏 <a href="./README.zh.md"><b>中文</b></a>
+  🌏 <a href="https://github.com/Code-MR0/dsh-ui-better-sidebar-skill/blob/main/docs/README.zh.md"><b>中文</b></a>
 </div>
 
 <div align="center">

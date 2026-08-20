@@ -19,9 +19,12 @@ import {
   userSkillRoot, writeSkillFile, type CollectOptions, type SkillEntry,
 } from './collect.ts'
 import { parseFrontmatter, setFrontmatterField } from './frontmatter.ts'
+import { importSkillZip } from './importZip.ts'
 
 /** Cap on JSON request bodies. */
 const MAX_JSON_BODY_BYTES = 1 * 1024 * 1024
+/** Cap on the raw ZIP upload body. */
+const MAX_ZIP_BODY_BYTES = 20 * 1024 * 1024
 
 /** Route paths (client bundle mirrors these literals; tests assert both sides). */
 export const ROUTES = {
@@ -31,6 +34,7 @@ export const ROUTES = {
   readFile: '/api/dsh-skill-studio/read-file',
   write: '/api/dsh-skill-studio/write',
   create: '/api/dsh-skill-studio/create',
+  importZip: '/api/dsh-skill-studio/import-zip',
   delete: '/api/dsh-skill-studio/delete',
   setEnabled: '/api/dsh-skill-studio/set-enabled',
   health: '/api/dsh-skill-studio/health',
@@ -59,6 +63,19 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
   } catch {
     return undefined
   }
+}
+
+/** Read a raw (binary) request body; undefined when it exceeds the cap. */
+async function readRawBody(req: IncomingMessage, maxBytes: number): Promise<Buffer | undefined> {
+  const chunks: Buffer[] = []
+  let size = 0
+  for await (const chunk of req) {
+    const buffer = chunk as Buffer
+    size += buffer.length
+    if (size > maxBytes) return undefined
+    chunks.push(buffer)
+  }
+  return Buffer.concat(chunks)
 }
 
 /** URL query helper (first value, decoded). */
@@ -391,6 +408,40 @@ export function makeRoutes(ctx: Context, deps: SkillRoutesDeps): WebRoute[] {
           }
           logger.warn(error)
           writeJson(res, 500, { error: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    },
+    {
+      kind: 'exact',
+      path: ROUTES.importZip,
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (!guard(req, res, 'POST')) return
+        try {
+          const url = new URL(req.url ?? '/', 'http://x')
+          const root = queryParam(url, 'root')
+          const name = queryParam(url, 'name') ?? ''
+          const cwd = queryParam(url, 'cwd') ?? DEFAULT_CWD()
+          if (root !== 'user' && root !== 'project') {
+            writeJson(res, 400, { error: 'root must be user (~/.dsh/skills) or project (project .dsh/skills)' })
+            return
+          }
+          const zip = await readRawBody(req, MAX_ZIP_BODY_BYTES)
+          if (zip === undefined || zip.length === 0) {
+            writeJson(res, 400, { error: 'missing zip body or exceeds 20MB cap' })
+            return
+          }
+          const baseDir = root === 'user'
+            ? userSkillRoot(dshHome)
+            : projectSkillRoot(findProjectRoot(cwd))
+          const result = await importSkillZip(zip, baseDir, name)
+          writeJson(res, 200, { ok: true, name: result.name, path: result.skillPath })
+        } catch (error) {
+          if (error instanceof Error && /already exists/.test(error.message)) {
+            writeJson(res, 409, { error: error.message })
+            return
+          }
+          logger.warn(error)
+          writeJson(res, 400, { error: error instanceof Error ? error.message : String(error) })
         }
       },
     },

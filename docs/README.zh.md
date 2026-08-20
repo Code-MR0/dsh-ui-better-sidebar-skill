@@ -8,7 +8,7 @@
 </div>
 
 <div align="center">
-  🌏 <a href="./README.md"><b>English</b></a>
+  🌏 <a href="../README.md"><b>English</b></a>
 </div>
 
 <div align="center">

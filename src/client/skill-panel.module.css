@@ -326,6 +326,28 @@
   justify-content: flex-end;
   margin-top: 12px;
 }
+.zipDivider {
+  margin: 12px 0 10px;
+  font-size: 11px;
+  text-align: center;
+  opacity: .6;
+  position: relative;
+}
+.zipDivider::before,
+.zipDivider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 32%;
+  height: 1px;
+  background: var(--dsw-alias-border-l1, rgba(128, 128, 128, .3));
+}
+.zipDivider::before {
+  left: 0;
+}
+.zipDivider::after {
+  right: 0;
+}
 
 .spacer {
   flex: 1;

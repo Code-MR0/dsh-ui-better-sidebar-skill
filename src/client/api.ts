@@ -11,6 +11,7 @@ const API = {
   readFile: '/api/dsh-skill-studio/read-file',
   write: '/api/dsh-skill-studio/write',
   create: '/api/dsh-skill-studio/create',
+  importZip: '/api/dsh-skill-studio/import-zip',
   delete: '/api/dsh-skill-studio/delete',
   setEnabled: '/api/dsh-skill-studio/set-enabled',
 } as const
@@ -77,6 +78,30 @@ export class SkillApi {
   /** Create a skill file under the user or project root. */
   async create(payload: { root: 'user' | 'project'; name: string; description: string; whenToUse?: string; content: string; cwd: string }): Promise<{ ok: true; name: string; path: string }> {
     return this.request(API.create, { method: 'POST', body: payload })
+  }
+
+  /** Import a skill from a ZIP file (raw bytes). Name may be '' to derive it
+   *  from the zip's single top-level folder. */
+  async importZip(root: 'user' | 'project', name: string, cwd: string | undefined, file: Blob): Promise<{ ok: true; name: string; path: string }> {
+    const query = `?root=${encodeURIComponent(root)}&name=${encodeURIComponent(name)}${cwd === undefined ? '' : `&cwd=${encodeURIComponent(cwd)}`}`
+    const response = await fetch(API.importZip + query, {
+      method: 'POST',
+      headers: { 'content-type': 'application/octet-stream' },
+      body: file,
+    })
+    let body: unknown
+    try {
+      body = await response.json()
+    } catch {
+      body = undefined
+    }
+    if (!response.ok) {
+      const message = typeof body === 'object' && body !== null && typeof (body as { error?: unknown }).error === 'string'
+        ? (body as { error: string }).error
+        : `HTTP ${response.status}`
+      throw new ApiError(message)
+    }
+    return body as { ok: true; name: string; path: string }
   }
 
   /** Delete a skill (moves it into .trash). */

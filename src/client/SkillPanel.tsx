@@ -139,6 +139,8 @@ function CreateForm(props: { cwd?: string; projectRoot: string; api: SkillApi; o
   const [content, setContent] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | undefined>(undefined)
+  const [zipFile, setZipFile] = useState<File | undefined>(undefined)
+  const [zipBusy, setZipBusy] = useState(false)
 
   const submit = async (event: FormEvent): Promise<void> => {
     event.preventDefault()
@@ -150,6 +152,20 @@ function CreateForm(props: { cwd?: string; projectRoot: string; api: SkillApi; o
     } catch (error) {
       setErr(error instanceof Error ? error.message : String(error))
       setBusy(false)
+    }
+  }
+
+  /** Import a skill from an uploaded ZIP (name may stay empty to auto-derive). */
+  const importZip = async (): Promise<void> => {
+    if (zipFile === undefined) return
+    setZipBusy(true)
+    setErr(undefined)
+    try {
+      await api.importZip(root, name.trim(), cwd, zipFile)
+      onCreated()
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : String(error))
+      setZipBusy(false)
     }
   }
 
@@ -171,7 +187,7 @@ function CreateForm(props: { cwd?: string; projectRoot: string; api: SkillApi; o
           </select>
         ))}
         {field('名称（小写字母/数字/连字符）', (
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-skill-name" />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-skill-name（ZIP 导入时可留空自动取文件夹名）" />
         ))}
         {field('描述', (
           <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="一句话说明这个 skill 做什么" />
@@ -182,10 +198,17 @@ function CreateForm(props: { cwd?: string; projectRoot: string; api: SkillApi; o
         {field('正文内容（Markdown）', (
           <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder={'# 说明\n\n这个 skill 教 agent 如何……'} />
         ))}
+        <div className={css.zipDivider}>或上传 ZIP 包导入</div>
+        {field('选择 .zip 文件（须包含 SKILL.md，可在顶层或单个文件夹内）', (
+          <input type="file" accept=".zip,application/zip" onChange={(e) => setZipFile(e.target.files?.[0] ?? undefined)} />
+        ))}
+        <button type="button" className={`${css.btn} ${css.btnPrimary}`} onClick={() => void importZip()} disabled={zipBusy || zipFile === undefined}>
+          {zipBusy ? '导入中…' : zipFile === undefined ? '请先选择 ZIP 文件' : `上传并导入${zipFile.name.length > 24 ? `：${zipFile.name.slice(0, 24)}…` : `：${zipFile.name}`}`}
+        </button>
         {err === undefined ? null : <div className={css.statusError}>{err}</div>}
         <div className={css.modalActions}>
-          <button type="button" className={css.btn} onClick={onCancel} disabled={busy}>取消</button>
-          <button type="submit" className={`${css.btn} ${css.btnPrimary}`} disabled={busy || name.trim() === '' || description.trim() === ''}>
+          <button type="button" className={css.btn} onClick={onCancel} disabled={busy || zipBusy}>取消</button>
+          <button type="submit" className={`${css.btn} ${css.btnPrimary}`} disabled={busy || zipBusy || name.trim() === '' || description.trim() === ''}>
             {busy ? '创建中…' : '创建'}
           </button>
         </div>
