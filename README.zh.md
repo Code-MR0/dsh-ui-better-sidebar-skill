@@ -24,17 +24,6 @@
 - **➕ 管理**：新建（项目根或 `~/.dsh/skills`，生成标准 SKILL.md）、删除（移入可恢复的 `.trash`）、启用/禁用模型调用（改写 `disable-model-invocation`）；
 - **↔️ 可调布局**：左栏（技能 + 文件树）与内容区按百分比拖拽调整，松手记忆。
 
-## 🖼️ 功能预览
-
-| 截图 | 说明 |
-| --- | --- |
-| ![总览](screenshots/overview.png) | 技能工作台总览：左侧资源浏览器，右侧 `SKILL.md` 预览 |
-| ![目录树](screenshots/tree.png) | 展开 skill 后的懒加载文件树（子目录逐层展开） |
-| ![编辑](screenshots/edit.png) | 内联编辑并保存 |
-| ![新建](screenshots/create.png) | 新建 skill 表单（项目 / 全局） |
-
-> 截图占位：请将实拍截图放入 `screenshots/` 目录（文件名见上表），详见 [screenshots/README.md](screenshots/README.md)。
-
 ## 🔌 服务化接入
 
 - 「技能管理」Tab 通过外部插件 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) 的 `ctx.betterSidebar.registerTab` 注册，无 DOM 注入；
