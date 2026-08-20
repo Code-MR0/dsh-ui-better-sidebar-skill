@@ -1,7 +1,7 @@
 # @mhw12138/dsh-ui-better-sidebar-skill
 
 <div align="center">
-  <b style="font-size: 1.15em;">DSH Web GUI 的技能工作台：浏览、预览、编辑、管理你的全局与项目 skill</b><br /><br />
+  <b style="font-size: 1.15em;">A skill workbench for the DSH Web GUI: browse, preview, edit and manage your global and project skills</b><br /><br />
   <a href="https://github.com/Code-MR0/dsh-ui-better-sidebar-skill"><img alt="GitHub" src="https://img.shields.io/github/stars/Code-MR0/dsh-ui-better-sidebar-skill?style=flat" /></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" /></a>
   <img alt="version" src="https://img.shields.io/badge/version-0.1.0-blue" />
@@ -12,71 +12,73 @@
 </div>
 
 <div align="center">
-  <img alt="技能工作台总览" src="screenshots/overview.png" width="720" />
+  <img alt="Skill workbench overview" src="screenshots/overview.png" width="720" />
 </div>
 
-## ✨ 功能一览
+## ✨ Features
 
-- **🗂️ 资源浏览器**：按来源分级浏览全部 skill（项目 `.dsh/skills` / `.agents/skills`、全局 `~/.dsh/skills` / `~/.agents/skills`、系统内置只读），支持搜索；
-- **🌳 懒加载目录树**：展开 skill 即露出其完整目录（`SKILL.md` 与所有文件），逐层按需加载、可折叠，视觉与 dsh-better-sidebar 的 Files 资源管理器一致；
-- **📖 预览**：Markdown 渲染（标题/列表/代码块/引用/链接）、纯文本、二进制与大文件识别提示；
-- **✏️ 编辑**：内联编辑器直接改写任意文本文件（含 `SKILL.md` frontmatter），原子保存；
-- **➕ 管理**：新建（项目根或 `~/.dsh/skills`，生成标准 SKILL.md）、删除（移入可恢复的 `.trash`）、启用/禁用模型调用（改写 `disable-model-invocation`）；
-- **↔️ 可调布局**：左栏（技能 + 文件树）与内容区按百分比拖拽调整，松手记忆。
+- **🗂️ Explorer** — browse every skill grouped by source: project (`.dsh/skills` / `.agents/skills`), global user (`~/.dsh/skills` / `~/.agents/skills`), and read-only system bundled skills; search included.
+- **🌳 Lazy file tree** — expand a skill to reveal its whole directory (`SKILL.md` plus every file); subdirectories load on demand, one level at a time, collapsible — styled after dsh-better-sidebar's Files explorer.
+- **📖 Preview** — Markdown rendering (headings / lists / code blocks / quotes / links), plain text, with binary and oversized-file detection.
+- **✏️ Edit** — inline editor rewrites any text file (including the `SKILL.md` frontmatter) with an atomic save.
+- **➕ Manage** — create (project root or `~/.dsh/skills`, generating a standard SKILL.md), delete (moved into a recoverable `.trash`), and enable/disable model invocation (rewrites `disable-model-invocation`).
+- **↔️ Adjustable layout** — the explorer column and the content pane resize by percentage drag; the latest width is remembered.
 
-## 🔌 服务化接入
+## 🔌 Service-based integration
 
-- 「技能管理」Tab 通过外部插件 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) 的 `ctx.betterSidebar.registerTab` 注册，无 DOM 注入；
-- 数据来自官方 skill 根约定的文件系统扫描，host 半区以 `node:fs` 提供 `/api/dsh-skill-studio/*` 路由族。
+- The「技能管理」tab is registered through the external [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) plugin's `ctx.betterSidebar.registerTab` — no DOM injection.
+- Data comes from a filesystem scan of the official skill root conventions; the host half serves the `/api/dsh-skill-studio/*` route family on `node:fs`.
 
-## ⚙️ 安装
+## ⚙️ Install
 
-> **前提条件：[dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)
-> 需单独安装** — 本插件运行时依赖其 `ctx.betterSidebar` 服务，刻意不声明
-> 包依赖（结构镜像）。未安装时插件可装、Host 路由正常，但 Tab 不会出现。
+> **Prerequisite: [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)
+> must be installed separately** — this package consumes its `ctx.betterSidebar`
+> service at runtime and deliberately declares no package dependency
+> (structural mirror). Without better-sidebar the package installs and its
+> host routes run, but the「技能管理」tab never appears.
 
 ```sh
-dsh plugin --profile web add dsh-better-sidebar@latest                 # 前提
+dsh plugin --profile web add dsh-better-sidebar@latest                 # prerequisite
 dsh plugin --profile web add @mhw12138/dsh-ui-better-sidebar-skill@latest
 ```
 
-从源码安装（`pnpm install && pnpm build` 后）：
+From source (after `pnpm install && pnpm build`):
 
 ```sh
 dsh plugin --profile web add link:$(pwd)
 ```
 
-重启 `dsh web`，打开右侧面板的 + 菜单选择「技能管理」。
+Restart `dsh web`, then pick「技能管理」from the right panel's + menu.
 
-## 🛣️ 路由
+## 🛣️ Routes
 
-| 路由 | 方法 | 说明 |
+| Route | Method | Purpose |
 | --- | --- | --- |
-| `/api/dsh-skill-studio/list` | GET | 分级技能列表（`?cwd=` 覆盖） |
-| `/api/dsh-skill-studio/read` | POST | 读取 SKILL.md（`{ path }`） |
-| `/api/dsh-skill-studio/list-dir` | POST | 列出一个目录层（懒加载树，`{ dir }`） |
-| `/api/dsh-skill-studio/read-file` | POST | 读取 skill 目录内任意文件（`{ path }`） |
-| `/api/dsh-skill-studio/write` | POST | 保存文本内容（`{ path, content }`） |
-| `/api/dsh-skill-studio/create` | POST | 创建 skill（`{ root, name, description, whenToUse?, content, cwd }`） |
-| `/api/dsh-skill-studio/delete` | POST | 移入 `.trash`（`{ path }`） |
-| `/api/dsh-skill-studio/set-enabled` | POST | 启停模型调用（`{ path, enabled }`） |
-| `/api/dsh-skill-studio/health` | GET | 健康检查 |
+| `/api/dsh-skill-studio/list` | GET | Grouped skill list (`?cwd=` override) |
+| `/api/dsh-skill-studio/read` | POST | Read SKILL.md (`{ path }`) |
+| `/api/dsh-skill-studio/list-dir` | POST | List one directory level (lazy tree, `{ dir }`) |
+| `/api/dsh-skill-studio/read-file` | POST | Read any file inside a skill dir (`{ path }`) |
+| `/api/dsh-skill-studio/write` | POST | Save text content (`{ path, content }`) |
+| `/api/dsh-skill-studio/create` | POST | Create a skill (`{ root, name, description, whenToUse?, content, cwd }`) |
+| `/api/dsh-skill-studio/delete` | POST | Move into `.trash` (`{ path }`) |
+| `/api/dsh-skill-studio/set-enabled` | POST | Toggle model invocation (`{ path, enabled }`) |
+| `/api/dsh-skill-studio/health` | GET | Health check |
 
-## 🔒 安全模型
+## 🔒 Security model
 
-- 全部路由走 loopback 信任围栏（socket 地址 + Host 头 + 浏览器同源标记）；装了
-  dsh-remote-web-ui 时有效已配对设备 cookie 为额外放行路径，本插件不硬依赖它。
-- 写路由只信任 skill 根（项目/全局/系统）下的路径；系统内置只读由路由层强制。
-- 内容上限：read/write 1MB、create 512KB；Markdown 以 React 元素渲染（无 HTML 注入）。
+- Every route sits behind the loopback trust fence (socket address + Host header + browser same-origin markers); a live paired-device cookie from dsh-remote-web-ui is an extra allow path when that plugin is loaded. This package never hard-depends on remote-web-ui.
+- Write routes only trust paths under the skill roots (project / global / system); system-bundled paths are read-only at the route level.
+- Content caps: read/write 1MB, create 512KB. Markdown is rendered as React elements (no HTML injection).
 
-## 📌 已知限制
+## 📌 Known limits
 
-- frontmatter 解析为零依赖轻量实现；生僻 YAML 以官方 dsh-skill-filesystem 为准。
-- 项目组跟随侧边栏显示的 workspace（`scope.cwd`），项目根为其最近 `.git` 祖先。
-- 界面文案暂为中文，后续可叠加 i18n 命名空间。
+- Frontmatter parsing is a zero-dependency lightweight implementation; exotic YAML follows the official dsh-skill-filesystem provider.
+- The project group follows the workspace shown in the sidebar (`scope.cwd`); its project root is the nearest `.git` ancestor.
+- UI copy is Chinese for now; an i18n namespace can be layered on later.
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-本插件基于外部插件 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)
-（MIT，作者 omdsh-dev）的右侧面板框架开发：Tab 经其 `ctx.betterSidebar` 服务注册，
-文件树沿用其 Files 资源管理器视觉风格。本插件以 [MIT 协议](LICENSE) 发布。
+Built on top of the external [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar)
+(MIT, by omdsh-dev) right-panel framework: the tab is registered through its
+`ctx.betterSidebar` service and the file tree follows its Files explorer look.
+This package is released under the [MIT License](LICENSE).

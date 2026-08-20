@@ -1,7 +1,7 @@
 {
   "name": "@mhw12138/dsh-ui-better-sidebar-skill",
   "description": "DSH skill studio: browse global and project skills by source, preview SKILL.md, edit and save, enable/disable model invocation, create and delete — as a tab in the external dsh-better-sidebar right panel.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
