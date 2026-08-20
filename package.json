@@ -61,7 +61,15 @@
     "lib",
     "cordis.patch.yml",
     "README.md",
-    "README.zh.md"
+    "README.zh.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Code-MR0/dsh-ui-better-sidebar-skill.git"
+  },
   "license": "MIT"
 }
